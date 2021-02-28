@@ -1,5 +1,6 @@
 import { css } from '@linaria/core'
 import React, { useCallback, useState } from 'react'
+import Head from 'next/head'
 
 import { Item } from '../components/Item'
 
@@ -15,26 +16,42 @@ function Example() {
   }, [])
 
   return (
-    <div
-      className={css`
-        .aaa:disabled {
-          cursor: not-allowed;
-        }
-      `}
-    >
-      <input
-        value={text}
-        onChange={(e) => {
-          setText(e.target.value)
-        }}
-      />
-      <button className={'aaa'} onClick={addText} disabled={!text}>
-        Add item
-      </button>
-      {a.map((item, index) => (
-        <Item key={item + index} text={item} index={index} onDelete={deleteText} />
-      ))}
-    </div>
+    <>
+      <Head>
+        <title>TODO LIST</title>
+      </Head>
+      <div
+        className={css`
+          display: flex;
+          justify-content: center;
+          flex-direction: column;
+          align-items: center;
+        `}
+      >
+        <div>
+          <input
+            value={text}
+            onChange={(e) => {
+              setText(e.target.value)
+            }}
+          />
+          <button
+            className={css`
+              &:disabled {
+                cursor: not-allowed;
+              }
+            `}
+            onClick={addText}
+            disabled={!text}
+          >
+            Add item
+          </button>
+          {a.map((item, index) => (
+            <Item key={item + index} text={item} index={index} onDelete={deleteText} />
+          ))}
+        </div>
+      </div>
+    </>
   )
 }
 
