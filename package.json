@@ -5,11 +5,24 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "format": "prettier --write ."
   },
   "dependencies": {
+    "@linaria/core": "^3.0.0-beta.1",
+    "@linaria/react": "^3.0.0-beta.1",
     "next": "10.0.7",
     "react": "17.0.1",
     "react-dom": "17.0.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.13.8",
+    "@linaria/babel-preset": "^3.0.0-beta.1",
+    "@linaria/shaker": "^3.0.0-beta.1",
+    "@linaria/webpack-loader": "^3.0.0-beta.1",
+    "@types/node": "^14.14.31",
+    "@types/react": "^17.0.2",
+    "prettier": "^2.2.1",
+    "typescript": "^4.2.2"
   }
 }
