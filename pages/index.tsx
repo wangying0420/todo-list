@@ -1,37 +1,56 @@
 import { css } from '@linaria/core'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import Head from 'next/head'
-
-import { TodoItem } from '../components/TodoItem'
-import { ComplatedItem } from '../components/ComplatedItem'
 import { Button, Input, Collapse } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
+
+import { TodoItem } from '../components/TodoItem'
+import { CompletedItem } from '../components/CompletedItem'
+
 const { Panel } = Collapse
 
 function Example() {
-  const [text, setText] = useState('')
-  const addText = useCallback(() => {
-    setTodoList((old) => [text, ...old])
-    setText('')
-  }, [text])
+  const [task, setTask] = useState('')
+  const addText = useCallback(async () => {
+    await fetch(`/api/addText?text=${task}`, { method: 'POST' })
+    setTask('')
+  }, [task])
   const [todoList, setTodoList] = useState<string[]>([])
-  const deleteText = useCallback((index: number) => {
+  const deleteTask = useCallback((index: number) => {
     setTodoList((old) => old.filter((_item, i) => i !== index))
   }, [])
-  const [complatedList, setComplatedList] = useState<string[]>([])
-  const complatedJob = useCallback(
+  const [completedList, setCompletedList] = useState<string[]>([])
+  const completedTask = useCallback(
     (index: number, text: string) => {
       setTodoList((old) => old.filter((_item, i) => i !== index))
-      setComplatedList((old) => [text, ...old])
+      setCompletedList((old) => [text, ...old])
     },
-    [text],
+    [task],
   )
-  const addTodo = useCallback(
-    (index: number, text: string) => {
-      setTodoList((old) => [text, ...old])
-      setComplatedList((old) => old.filter((_item, i) => i !== index))
+  const [isLoading, setIsLoading] = useState(false)
+  const [hasError, setHasError] = useState(false)
+  useEffect(() => {
+    setIsLoading(true)
+    setHasError(false)
+    fetch('/api/list')
+      .then((response) => response.json())
+      .then((data: { todo: string[]; completed: string[] }) => {
+        setTodoList(data.todo)
+        setCompletedList(data.completed)
+      })
+      .catch(() => {
+        setHasError(true)
+      })
+      .finally(() => {
+        setIsLoading(false)
+      })
+  }, [])
+  const markTaskAsTodo = useCallback(
+    async (index: number, task: string) => {
+      setTodoList((old) => [task, ...old])
+      setCompletedList((old) => old.filter((_item, i) => i !== index))
     },
-    [text],
+    [task],
   )
 
   return (
@@ -62,10 +81,10 @@ function Example() {
           >
             <Input
               className={'input'}
-              value={text}
+              value={task}
               size="large"
               onChange={(e) => {
-                setText(e.target.value)
+                setTask(e.target.value)
               }}
             />
             <Button
@@ -78,9 +97,9 @@ function Example() {
                 }
               `}
               onClick={addText}
-              disabled={!text}
+              disabled={!task}
             >
-              Add item
+              Add Task
             </Button>
           </div>
           <Collapse defaultActiveKey={['todo']}>
@@ -88,25 +107,25 @@ function Example() {
               {todoList.map((item, index) => (
                 <TodoItem
                   key={item + index}
-                  text={item}
+                  task={item}
                   index={index}
                   onDelete={() => {
-                    deleteText(index)
+                    deleteTask(index)
                   }}
                   onCheck={() => {
-                    complatedJob(index, item)
+                    completedTask(index, item)
                   }}
                 />
               ))}
             </Panel>
             <Panel header="Complated" key="complated">
-              {complatedList.map((item, index) => (
-                <ComplatedItem
+              {completedList.map((item, index) => (
+                <CompletedItem
                   key={item + index}
                   text={item}
                   index={index}
                   onCheck={() => {
-                    addTodo(index, item)
+                    markTaskAsTodo(index, item)
                   }}
                 />
               ))}

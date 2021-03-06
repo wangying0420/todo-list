@@ -2,7 +2,7 @@ import { css } from '@linaria/core'
 import Checkbox from 'antd/lib/checkbox/Checkbox'
 import React, { useCallback, useState } from 'react'
 
-export function ComplatedItem(props: {
+export function CompletedItem(props: {
   text: string
   index: number
   onCheck: (index: number, text: string) => void
