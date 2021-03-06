@@ -4,12 +4,12 @@ import React, { useCallback, useState } from 'react'
 
 export function CompletedItem(props: {
   text: string
-  index: number
-  onCheck: (index: number, text: string) => void
+  id: string
+  onCheck: (id: string, text: string) => void
 }) {
   const handleCheck = useCallback(() => {
-    props.onCheck(props.index, props.text)
-  }, [props.onCheck, props.index, props.text])
+    props.onCheck(props.id, props.text)
+  }, [props.onCheck, props.id, props.text])
   return (
     <div
       className={css`

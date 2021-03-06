@@ -8,30 +8,11 @@ import { nanoid } from 'nanoid'
 import { TodoItem } from '../components/TodoItem'
 import { CompletedItem } from '../components/CompletedItem'
 import { Task } from '../storage'
-import addTask from './api/addTask'
 
 const { Panel } = Collapse
 
 function Example() {
-  const [text, setText] = useState('')
-  const addText = useCallback(async () => {
-    await fetch(`/api/addTask?text=${text}&id=${nanoid()}`, { method: 'POST' })
-    setText('')
-  }, [text])
-  const [todoList, setTodoList] = useState<Task[]>([])
-  const deleteTask = useCallback(async (id: string) => {
-    await fetch(`/api/deleteTask?id=${id}`, { method: 'POST' })
-  }, [])
-  const [completedList, setCompletedList] = useState<Task[]>([])
-  const completeTask = useCallback(
-    async (text: string, id: string) => {
-      await fetch(`/api/completeTask?text=${text}&id=${id}`, { method: 'POST' })
-    },
-    [text],
-  )
-  const [isLoading, setIsLoading] = useState(false)
-  const [hasError, setHasError] = useState(false)
-  useEffect(() => {
+  const handleList = useCallback(() => {
     setIsLoading(true)
     setHasError(false)
     fetch('/api/list')
@@ -47,10 +28,36 @@ function Example() {
         setIsLoading(false)
       })
   }, [])
-  const markTaskAsTodo = useCallback(
-    async (id: string, task: string) => {
-      setTodoList((old) => [{ id, task }, ...old])
-      setCompletedList((old) => old.filter((_item, i) => i !== index))
+  useEffect(() => {
+    handleList()
+  }, [handleList])
+  const [text, setText] = useState('')
+  const addText = useCallback(async () => {
+    await fetch(`/api/addTask?text=${text}&id=${nanoid()}`, { method: 'POST' })
+    setText('')
+    handleList()
+  }, [text, handleList])
+  const [todoList, setTodoList] = useState<Task[]>([])
+  const deleteTask = useCallback(
+    async (id: string) => {
+      await fetch(`/api/deleteTask?id=${id}`, { method: 'POST' })
+      handleList()
+    },
+    [handleList],
+  )
+  const [completedList, setCompletedList] = useState<Task[]>([])
+  const completeTask = useCallback(
+    async (text: string, id: string) => {
+      await fetch(`/api/completeTask?text=${text}&id=${id}`, { method: 'POST' })
+    },
+    [text],
+  )
+  const [isLoading, setIsLoading] = useState(false)
+  const [hasError, setHasError] = useState(false)
+
+  const rollBackTaskToTodoList = useCallback(
+    async (text: string, id: string) => {
+      await fetch(`/api/completeTask?text=${text}&id=${id}`, { method: 'POST' })
     },
     [text],
   )
@@ -120,14 +127,14 @@ function Example() {
                 />
               ))}
             </Panel>
-            <Panel header="Complated" key="complated">
-              {completedList.map((item, index) => (
+            <Panel header="Completed" key="completed">
+              {completedList.map((task) => (
                 <CompletedItem
-                  key={item + index}
-                  text={item}
-                  index={index}
+                  key={task.id}
+                  text={task.text}
+                  id={task.id}
                   onCheck={() => {
-                    markTaskAsTodo(index, item)
+                    rollBackTaskToTodoList(task.id, task.text)
                   }}
                 />
               ))}

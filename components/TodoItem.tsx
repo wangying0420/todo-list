@@ -6,15 +6,15 @@ import { DeleteOutlined } from '@ant-design/icons'
 export function TodoItem(props: {
   text: string
   id: string
-  onDelete: (id: number) => void
-  onCheck: (id: number, text: string) => void
+  onDelete: (id: string) => void
+  onCheck: (id: string, text: string) => void
 }) {
   const handleClick = useCallback(() => {
     props.onDelete(props.id)
   }, [props.onDelete])
   const handleCheck = useCallback(() => {
-    props.onCheck(props.index, props.text)
-  }, [props.onCheck, props.index, props.text])
+    props.onCheck(props.id, props.text)
+  }, [props.onCheck, props.id, props.text])
 
   return (
     <div
