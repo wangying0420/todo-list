@@ -3,29 +3,31 @@ import React, { useCallback, useEffect, useState } from 'react'
 import Head from 'next/head'
 import { Button, Input, Collapse } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
+import { nanoid } from 'nanoid'
 
 import { TodoItem } from '../components/TodoItem'
 import { CompletedItem } from '../components/CompletedItem'
+import { Task } from '../storage'
+import addTask from './api/addTask'
 
 const { Panel } = Collapse
 
 function Example() {
-  const [task, setTask] = useState('')
+  const [text, setText] = useState('')
   const addText = useCallback(async () => {
-    await fetch(`/api/addText?text=${task}`, { method: 'POST' })
-    setTask('')
-  }, [task])
-  const [todoList, setTodoList] = useState<string[]>([])
-  const deleteTask = useCallback((index: number) => {
-    setTodoList((old) => old.filter((_item, i) => i !== index))
+    await fetch(`/api/addTask?text=${text}&id=${nanoid()}`, { method: 'POST' })
+    setText('')
+  }, [text])
+  const [todoList, setTodoList] = useState<Task[]>([])
+  const deleteTask = useCallback(async (id: string) => {
+    await fetch(`/api/deleteTask?id=${id}`, { method: 'POST' })
   }, [])
-  const [completedList, setCompletedList] = useState<string[]>([])
-  const completedTask = useCallback(
-    (index: number, text: string) => {
-      setTodoList((old) => old.filter((_item, i) => i !== index))
-      setCompletedList((old) => [text, ...old])
+  const [completedList, setCompletedList] = useState<Task[]>([])
+  const completeTask = useCallback(
+    async (text: string, id: string) => {
+      await fetch(`/api/completeTask?text=${text}&id=${id}`, { method: 'POST' })
     },
-    [task],
+    [text],
   )
   const [isLoading, setIsLoading] = useState(false)
   const [hasError, setHasError] = useState(false)
@@ -34,7 +36,7 @@ function Example() {
     setHasError(false)
     fetch('/api/list')
       .then((response) => response.json())
-      .then((data: { todo: string[]; completed: string[] }) => {
+      .then((data: { todo: Task[]; completed: Task[] }) => {
         setTodoList(data.todo)
         setCompletedList(data.completed)
       })
@@ -46,11 +48,11 @@ function Example() {
       })
   }, [])
   const markTaskAsTodo = useCallback(
-    async (index: number, task: string) => {
-      setTodoList((old) => [task, ...old])
+    async (id: string, task: string) => {
+      setTodoList((old) => [{ id, task }, ...old])
       setCompletedList((old) => old.filter((_item, i) => i !== index))
     },
-    [task],
+    [text],
   )
 
   return (
@@ -81,10 +83,10 @@ function Example() {
           >
             <Input
               className={'input'}
-              value={task}
+              value={text}
               size="large"
               onChange={(e) => {
-                setTask(e.target.value)
+                setText(e.target.value)
               }}
             />
             <Button
@@ -97,23 +99,23 @@ function Example() {
                 }
               `}
               onClick={addText}
-              disabled={!task}
+              disabled={!text}
             >
               Add Task
             </Button>
           </div>
           <Collapse defaultActiveKey={['todo']}>
             <Panel header="Todo" key="todo">
-              {todoList.map((item, index) => (
+              {todoList.map((task) => (
                 <TodoItem
-                  key={item + index}
-                  task={item}
-                  index={index}
+                  key={task.id}
+                  text={task.text}
+                  id={task.id}
                   onDelete={() => {
-                    deleteTask(index)
+                    deleteTask(task.id)
                   }}
                   onCheck={() => {
-                    completedTask(index, item)
+                    completeTask(task.id, task.text)
                   }}
                 />
               ))}

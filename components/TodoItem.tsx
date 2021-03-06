@@ -4,17 +4,17 @@ import React, { useCallback, useState } from 'react'
 import { DeleteOutlined } from '@ant-design/icons'
 
 export function TodoItem(props: {
-  task: string
-  index: number
-  onDelete: (index: number) => void
-  onCheck: (index: number, task: string) => void
+  text: string
+  id: string
+  onDelete: (id: number) => void
+  onCheck: (id: number, text: string) => void
 }) {
   const handleClick = useCallback(() => {
-    props.onDelete(props.index)
+    props.onDelete(props.id)
   }, [props.onDelete])
   const handleCheck = useCallback(() => {
-    props.onCheck(props.index, props.task)
-  }, [props.onCheck, props.index, props.task])
+    props.onCheck(props.index, props.text)
+  }, [props.onCheck, props.index, props.text])
 
   return (
     <div
@@ -54,7 +54,7 @@ export function TodoItem(props: {
             margin-right: 5px;
           `}
         />
-        <div>{props.task}</div>
+        <div>{props.text}</div>
       </div>
       <div>
         <Button
